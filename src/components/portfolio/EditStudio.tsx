@@ -28,6 +28,12 @@ export function EditStudio({ projects, initialProjectId, onSave, onDelete, onAdd
 
   useEffect(() => () => clearTimeout(saveMsgTimer.current), []);
 
+  // Reset update form state when switching projects
+  useEffect(() => {
+    setNewUpdateHeading('');
+    setNewUpdateContent('');
+  }, [selectedId]);
+
   const filtered = useMemo(() => {
     if (!search) return projects;
     const q = search.toLowerCase();
