@@ -43,7 +43,8 @@ export function updateProject(id: string, data: Partial<Project>): Project | und
   const projects = read();
   const idx = projects.findIndex(p => p.id === id);
   if (idx === -1) return undefined;
-  projects[idx] = { ...projects[idx], ...data, updatedAt: new Date().toISOString() };
+  const { id: _id, createdAt: _ca, updates: _u, ...safe } = data;
+  projects[idx] = { ...projects[idx], ...safe, updatedAt: new Date().toISOString() };
   write(projects);
   return projects[idx];
 }

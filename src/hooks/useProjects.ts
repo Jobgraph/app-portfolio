@@ -9,21 +9,22 @@ export function useProjects() {
     return stored.length > 0 ? stored : MOCK_PROJECTS;
   });
 
+  const [isMockData, setIsMockData] = useState(() => store.getProjects().length === 0);
+
   const refresh = useCallback(() => {
     const stored = store.getProjects();
     setProjects(stored.length > 0 ? stored : MOCK_PROJECTS);
   }, []);
 
   const add = useCallback((data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'updates'>) => {
-    if (projects === MOCK_PROJECTS) {
-      for (const mock of MOCK_PROJECTS) {
-        store.addProject(mock);
-      }
+    if (isMockData) {
+      localStorage.setItem('jg-portfolio-projects', JSON.stringify(MOCK_PROJECTS));
+      setIsMockData(false);
     }
     const p = store.addProject(data);
     refresh();
     return p;
-  }, [projects, refresh]);
+  }, [isMockData, refresh]);
 
   const update = useCallback((id: string, data: Partial<Project>) => {
     const result = store.updateProject(id, data);

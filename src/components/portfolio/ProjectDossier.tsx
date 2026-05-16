@@ -25,6 +25,11 @@ export function ProjectDossier({ project, projects, onClose, onSwitch, onDelete,
     return () => document.removeEventListener('keydown', handler);
   }, [onClose]);
 
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   const filteredProjects = projects.filter(p => {
     if (!switcherSearch) return true;
     const q = switcherSearch.toLowerCase();
@@ -102,6 +107,7 @@ export function ProjectDossier({ project, projects, onClose, onSwitch, onDelete,
           {/* Body */}
           <div className="flex-1 overflow-y-auto">
             <ProjectPanel
+              key={project.id}
               project={project}
               onDelete={onDelete}
               onAddUpdate={onAddUpdate}

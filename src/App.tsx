@@ -92,7 +92,7 @@ export default function App() {
             projects={projects}
             onSelect={handleSelect}
             onSubmitNew={() => setView('submit')}
-            onEdit={() => setView('edit')}
+            onEdit={() => navigate('edit')}
           />
         )}
 
