@@ -14,14 +14,20 @@ interface AppShellProps {
 
 export function AppShell({ config, currentView, onNavigate, projectCount, children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <Header config={config} onMenuClick={() => setMobileOpen(!mobileOpen)} />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         <div className="hidden md:flex">
-          <Sidebar currentView={currentView} onNavigate={onNavigate} projectCount={projectCount} />
+          <Sidebar
+            currentView={currentView}
+            onNavigate={onNavigate}
+            projectCount={projectCount}
+            onCollapsedChange={setSidebarCollapsed}
+          />
         </div>
 
         {mobileOpen && (
@@ -40,7 +46,7 @@ export function AppShell({ config, currentView, onNavigate, projectCount, childr
           </>
         )}
 
-        <main className="flex-1 overflow-y-auto">
+        <main className={`flex-1 overflow-y-auto transition-[margin-left] duration-200 ease-in-out ${sidebarCollapsed ? 'md:ml-0' : ''}`}>
           {children}
         </main>
       </div>

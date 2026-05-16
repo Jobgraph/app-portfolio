@@ -8,7 +8,8 @@ import type { View, Project } from './lib/types';
 import { AppShell } from './components/shell/AppShell';
 import { PortfolioList } from './components/portfolio/PortfolioList';
 import { ProjectSubmitForm } from './components/portfolio/ProjectSubmitForm';
-import { ProjectDetail } from './components/portfolio/ProjectDetail';
+import { ProjectDossier } from './components/portfolio/ProjectDossier';
+import { EditStudio } from './components/portfolio/EditStudio';
 
 export default function App() {
   const themeCtx = useThemeProvider();
@@ -16,29 +17,27 @@ export default function App() {
   const { projects, add, update, remove, addUpdate } = useProjects();
   const [view, setView] = useState<View>('portfolio');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editProjectId, setEditProjectId] = useState<string | null>(null);
 
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);
-    setView('detail');
   }, []);
 
-  const handleBack = useCallback(() => {
+  const handleCloseDossier = useCallback(() => {
     setSelectedId(null);
-    setView('portfolio');
   }, []);
 
   const handleSubmit = useCallback((data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'updates'>) => {
     const p = add(data);
     toast.success(`"${p.name}" added to portfolio`);
     setSelectedId(p.id);
-    setView('detail');
+    setView('portfolio');
   }, [add]);
 
   const handleDelete = useCallback((id: string) => {
     remove(id);
     toast.success('Project deleted');
     setSelectedId(null);
-    setView('portfolio');
   }, [remove]);
 
   const handleAddUpdate = useCallback((projectId: string, heading: string, content: string) => {
@@ -50,8 +49,14 @@ export default function App() {
     update(id, data);
   }, [update]);
 
+  const handleOpenEditor = useCallback((id: string) => {
+    setEditProjectId(id);
+    setSelectedId(null);
+    setView('edit');
+  }, []);
+
   const navigate = useCallback((v: View) => {
-    if (v === 'portfolio') {
+    if (v !== 'detail') {
       setSelectedId(null);
     }
     setView(v);
@@ -59,8 +64,15 @@ export default function App() {
 
   if (configLoading || !config) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <div className="h-6 w-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative">
+            <div className="h-8 w-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-1.5 w-1.5 bg-primary rounded-full animate-pulse" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -80,30 +92,50 @@ export default function App() {
             projects={projects}
             onSelect={handleSelect}
             onSubmitNew={() => setView('submit')}
+            onEdit={() => setView('edit')}
           />
         )}
 
         {view === 'submit' && (
           <ProjectSubmitForm
             onSubmit={handleSubmit}
-            onCancel={handleBack}
+            onCancel={() => setView('portfolio')}
           />
         )}
 
-        {view === 'detail' && selectedProject && (
-          <ProjectDetail
-            project={selectedProject}
-            onBack={handleBack}
+        {view === 'edit' && (
+          <EditStudio
+            projects={projects}
+            initialProjectId={editProjectId}
+            onSave={handleEdit}
             onDelete={handleDelete}
             onAddUpdate={handleAddUpdate}
-            onEdit={handleEdit}
+            onBack={() => { setView('portfolio'); setEditProjectId(null); }}
           />
         )}
 
-        {view === 'detail' && !selectedProject && (
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            <p className="text-sm">Project not found.</p>
+        {view === 'analytics' && (
+          <div className="max-w-4xl mx-auto p-6">
+            <div className="border border-border rounded-xl bg-card p-8 text-center">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground mb-2">Coming soon</p>
+              <h2 className="text-2xl font-extrabold text-foreground mb-2">Analytics</h2>
+              <p className="text-sm text-muted-foreground">Portfolio analytics and reporting dashboards will appear here.</p>
+            </div>
           </div>
+        )}
+
+        {/* Dossier overlay */}
+        {selectedProject && (
+          <ProjectDossier
+            project={selectedProject}
+            projects={projects}
+            onClose={handleCloseDossier}
+            onSwitch={handleSelect}
+            onDelete={(id) => { handleDelete(id); handleCloseDossier(); }}
+            onAddUpdate={handleAddUpdate}
+            onEdit={handleEdit}
+            onOpenEditor={handleOpenEditor}
+          />
         )}
       </AppShell>
     </ThemeContext>
