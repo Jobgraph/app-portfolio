@@ -51,5 +51,6 @@ export function generateComplianceBriefing(projects: Project[]): string {
     return `${dpiaOk}/${dpiaEligible} eligible ${stage} projects have a completed DPIA (${pct(dpiaOk, dpiaEligible)}%). ${rrOk}/${rrEligible} eligible ${stage} projects have a risk register (${pct(rrOk, rrEligible)}%).`;
   };
 
-  return [brief('pilot'), brief('scale')].filter(Boolean).join('\n\n');
+  const result = [brief('pilot'), brief('scale')].filter(Boolean).join('\n\n');
+  return result || 'No pilot or scale projects in the current portfolio.';
 }

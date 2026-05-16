@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { ChevronLeft, Plus, Trash2, Search, Save, AlertCircle } from 'lucide-react';
 import type { Project, ProjectStage, GovernanceTier, ComplianceStatus } from '../../lib/types';
 import { STAGE_LABELS, TIER_LABELS, COMPLIANCE_LABELS } from '../../lib/types';
@@ -24,6 +24,15 @@ export function EditStudio({ projects, initialProjectId, onSave, onDelete, onAdd
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [newUpdateHeading, setNewUpdateHeading] = useState('');
   const [newUpdateContent, setNewUpdateContent] = useState('');
+  const saveMsgTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(saveMsgTimer.current), []);
+
+  // Reset update form state when switching projects
+  useEffect(() => {
+    setNewUpdateHeading('');
+    setNewUpdateContent('');
+  }, [selectedId]);
 
   const filtered = useMemo(() => {
     if (!search) return projects;
@@ -36,8 +45,9 @@ export function EditStudio({ projects, initialProjectId, onSave, onDelete, onAdd
   const handleSave = (data: Partial<Project>) => {
     if (!project) return;
     onSave(project.id, data);
+    clearTimeout(saveMsgTimer.current);
     setSaveMsg('Changes saved');
-    setTimeout(() => setSaveMsg(null), 2000);
+    saveMsgTimer.current = setTimeout(() => setSaveMsg(null), 2000);
   };
 
   const handleAddUpdate = () => {
@@ -103,7 +113,7 @@ export function EditStudio({ projects, initialProjectId, onSave, onDelete, onAdd
 
         {/* Main editor */}
         {project ? (
-          <div className="flex-1 overflow-y-auto">
+          <div key={project.id} className="flex-1 overflow-y-auto">
             <div className="max-w-3xl mx-auto p-6">
               {/* Header */}
               <div className="flex items-center gap-3 mb-6">
