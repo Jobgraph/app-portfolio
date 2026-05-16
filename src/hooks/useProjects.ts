@@ -13,7 +13,9 @@ export function useProjects() {
 
   const refresh = useCallback(() => {
     const stored = store.getProjects();
-    setProjects(stored.length > 0 ? stored : MOCK_PROJECTS);
+    const hasSavedData = stored.length > 0;
+    setProjects(hasSavedData ? stored : MOCK_PROJECTS);
+    setIsMockData(!hasSavedData);
   }, []);
 
   const add = useCallback((data: Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'updates'>) => {
